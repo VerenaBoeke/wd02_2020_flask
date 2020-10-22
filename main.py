@@ -6,6 +6,7 @@ app = Flask(__name__)
 def hello_world():
     if request.method == "POST":
         username = request.form.get("username")
+        app.logger.info(f"Form send with username: {username}")
         print(username)
         return render_template("hello_world.html")
     elif request.method == "GET":
