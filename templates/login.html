@@ -1,0 +1,30 @@
+{% extends "frame.html" %}
+{% block navigation %}
+{% include "components/nav.html" %}
+{% endblock navigation %}
+
+{% block title %}
+Hello World
+{% endblock title %}
+
+{% block content %}
+<div class="d-flex justify-content-center">
+
+</div>
+<h1>Login</h1>
+<form method="post">
+    <div class="form-group">
+        <label for="exampleInputUsername1">Username</label>
+        <input type="text" name="username" class="form-control" id="exampleInputUsername1">
+    </div>
+    <div class="form-group">
+        <label for="exampleInputPassword1">Password</label>
+        <input type="password" name="password" class="form-control" id="exampleInputPassword1">
+    </div>
+        <div class="form-group">
+        <label for="exampleInputPassword1Repeat">Password</label>
+        <input type="password" name="repeat" class="form-control" id="exampleInputPassword1Repeat">
+    </div>
+    <button type="submit" class="btn btn-primary">Login</button>
+</form>
+{% endblock content %}

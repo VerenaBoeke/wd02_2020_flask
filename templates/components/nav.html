@@ -10,9 +10,21 @@
       <li class="nav-item {% if navigation == 'about' %}active{% endif %}">
         <a class="nav-link" href="/about">About</a>
       </li>
+      <li class="nav-item {% if navigation == 'blog' %}active{% endif %}">
+        <a class="nav-link" href="/blog">Blog</a>
+      </li>
       <li class="nav-item {% if navigation == 'faq' %}active{% endif %}">
         <a class="nav-link" href="/faq">FAQ</a>
       </li>
+      {% if user %}
+      <li class="nav-item right">
+          <a class="nav-link" href="/logout">Logout</a>
+        </li>
+      {% else %}
+        <li class="nav-item right">
+            <a class="nav-link" href="/login?redirectTo={{ redirectTo }}">Login</a>
+        </li>
+      {% endif %}
     </ul>
   </div>
 </nav>

@@ -1,0 +1,34 @@
+{% extends "frame.html" %}
+{% block navigation %}
+{% include "components/nav.html" %}
+{% endblock navigation %}
+
+{% block title %}
+Post Detail
+{% endblock title %}
+{% block content %}
+    <h1>{{post.title}}</h1>
+  <div class="jumbotron">
+    <p class="lead">{{post.content}}</p>
+    <hr class="my-4">
+    <p>{{post.datetime.strftime("%d.%m.%Y %H:%M")}}, {{post.user.username}}</p>
+    <a class="btn btn-primary btn-lg" href="/blog" role="button">Back to overview</a>
+  </div>
+  <form method="post">
+    <div class="form-group">
+      <label for="commentpost">Your Comment</label>
+      <textarea class="form-control" id="commentpost" rows="3" name="content"></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">Speichern</button>
+  </form>
+  {% for comment in comments %}
+  <div class="alert alert-light" role="alert">
+      <p>
+    <h2>{{comment.content}}</h2>
+      </p>
+      <p>
+          {{comment.user.username}}, {{comment.datetime.strftime("%d.%m.%Y %H:%M")}}
+      </p>
+  </div>
+  {% endfor %}
+{% endblock content %}
