@@ -125,7 +125,6 @@ def login():
         return render_template("login.html", logged_in=logged_in)
 
 @app.route('/registration', methods=["GET", "POST"])
-@provide_user
 
 def registration():
     if request.method == "POST":
