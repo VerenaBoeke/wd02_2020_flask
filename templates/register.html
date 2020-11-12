@@ -11,7 +11,7 @@ Hello World
 <div class="d-flex justify-content-center">
 
 </div>
-<h1>Login</h1>
+<h1>Registration</h1>
 <form method="post">
     <div class="form-group">
         <label for="exampleInputUsername1">Username</label>
@@ -21,6 +21,10 @@ Hello World
         <label for="exampleInputPassword1">Password</label>
         <input type="password" name="password" class="form-control" id="exampleInputPassword1">
     </div>
-    <button type="submit" class="btn btn-primary">Login</button>
+        <div class="form-group">
+        <label for="exampleInputPassword1Repeat">Password</label>
+        <input type="password" name="repeat" class="form-control" id="exampleInputPassword1Repeat">
+    </div>
+    <button type="submit" class="btn btn-primary">Registrieren</button>
 </form>
 {% endblock content %}
