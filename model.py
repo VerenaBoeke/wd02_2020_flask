@@ -12,6 +12,7 @@ db = SQLAlchemy("sqlite:///blog.sqlite")
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    email = db.Column(db.Integer, unique=True)
     created = db.Column(db.DateTime, default=datetime.datetime.now)
     updated = db.Column(db.DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)
 

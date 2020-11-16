@@ -1,12 +1,15 @@
 import datetime
 import hashlib
 import uuid
+import re
 
-from flask import Flask, render_template, request, make_response, redirect, url_for
+from flask import Flask, render_template, request, make_response, redirect, url_for, flash
 
 from model import db, User, Post, Comment
 
 app = Flask(__name__)
+
+app.secret_key = b'dfdfgdsfgs-<34'
 
 db.create_all()
 
@@ -65,6 +68,29 @@ def provide_user(func):
     wrapper.__name__ = func.__name__
     return wrapper
 
+def checkMailExists(email):
+    mail_exists = False
+
+    email
+
+    return mail_exists
+
+def checkMailFormat(email):
+    is_valid = False
+
+    if re.match(r"[^@]+@[^@]+\.[^@]+", email):
+        is_valid = True
+
+    return is_valid
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
+
+@app.errorhandler(500)
+def server_error(e):
+    return render_template('500.html'), 500
+
 def getPath():
     return request.path or "/"
 
@@ -91,9 +117,10 @@ def login():
         expiry_time = datetime.datetime.now() + datetime.timedelta(seconds=COOKIE_DURATION)
 
         if user is None:
+            flash("Username or password is wrong", "warning")
             app.logger.info(f"User {username} failed to login with wrong password.")
             redirect_url = request.args.get('redirectTo')
-            return redirect(url_for('login', redirectTo=redirect_url, error="Wrong User or Password"))
+            return redirect(url_for('login', redirectTo=redirect_url))
 
         else:
             user.session_cookie = session_cookie
@@ -125,15 +152,21 @@ def login():
         return render_template("login.html", logged_in=logged_in)
 
 @app.route('/registration', methods=["GET", "POST"])
-
 def registration():
     if request.method == "POST":
         username = request.form.get("username")
+        email = request.form.get("email")
         password = request.form.get("password")
         repeat = request.form.get("repeat")
 
+        emailIsValid = mailCheck(email)
+        if not emailIsValid:
+            flash("Email is invalid!", "warning")
+            return redirect(url_for("registration"))
+
         if password != repeat:
-            return "Password and Repeat do not match! Please try again."
+            flash("Password and repeat did not match!", "warning")
+            return redirect(url_for("registration"))
 
         password_hash = hashlib.sha256(password.encode()).hexdigest()
 
@@ -141,6 +174,7 @@ def registration():
         expiry_time = datetime.datetime.now() + datetime.timedelta(seconds=COOKIE_DURATION)
 
         user = User(username=username,
+                    email=email,
                     password_hash=password_hash,
                     session_cookie=session_cookie,
                     session_expiry_datetime=expiry_time)
