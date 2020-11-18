@@ -12,7 +12,7 @@ db = SQLAlchemy("sqlite:///blog.sqlite")
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    email = db.Column(db.Integer, unique=True)
+    email = db.Column(db.String(255), unique=True)
     created = db.Column(db.DateTime, default=datetime.datetime.now)
     updated = db.Column(db.DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)
 
@@ -20,6 +20,7 @@ class User(db.Model):
     password_hash = db.Column(db.String(255), nullable=False)
     session_cookie = db.Column(db.String(255), nullable=True, unique=True)
     session_expiry_datetime = db.Column(db.DateTime)
+    role = db.Column(db.String(255))
 
     posts = db.relationship('Post', backref='users')
     comments = db.relationship('Comment', backref='users')

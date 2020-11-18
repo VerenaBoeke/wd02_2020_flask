@@ -16,21 +16,21 @@
       <li class="nav-item {% if navigation == 'faq' %}active{% endif %}">
         <a class="nav-link" href="/faq">FAQ</a>
       </li>
-      <li class="nav-item {% if navigation == 'faq' %}active{% endif %}">
+      <li class="nav-item {% if navigation == 'users' %}active{% endif %}">
+        <a class="nav-link" href="/users">Users</a>
+      </li>
+      <li class="nav-item {% if navigation == 'registration' %}active{% endif %}">
         <a class="nav-link" href="/registration">Register</a>
       </li>
       <li class="nav-item {% if navigation == 'github' %}active{% endif %}">
         <a class="nav-link" href="https://github.com/VerenaBoeke/wd02_2020_flask">GitHub</a>
       </li>
-      {% if user %}
       <li class="nav-item right">
           <a class="nav-link" href="/logout">Logout</a>
-        </li>
-      {% else %}
+      </li>
         <li class="nav-item right">
-            <a class="nav-link" href="/login?redirectTo={{ redirectTo }}">Login</a>
-        </li>
-      {% endif %}
+          <a class="nav-link" href="/login?redirectTo={{ redirectTo }}">Login</a>
+      </li>
     </ul>
   </div>
 </nav>

@@ -1,20 +1,40 @@
 import datetime
 import hashlib
+import os
 import uuid
 import re
 
 from flask import Flask, render_template, request, make_response, redirect, url_for, flash
+from flask_mail import Mail, Message
 
+import email_config
 from model import db, User, Post, Comment
 
 app = Flask(__name__)
 
 app.secret_key = b'dfdfgdsfgs-<34'
 
+app.config.update(
+    DEBUG=True,
+    # EMAIL SETTINGS
+    MAIL_SERVER=os.getenv("MAIL_SERVER", email_config.MAIL_SERVER),
+    MAIL_PORT=int(os.getenv("MAIL_PORT", email_config.MAIL_PORT)),
+    MAIL_USE_SSL=True,
+    MAIL_USERNAME=os.getenv("MAIL_USERNAME", email_config.MAIL_USERNAME),
+    MAIL_PASSWORD=os.getenv("MAIL_PASSWORD", email_config.MAIL_PASSWORD),
+)
+
+mail = Mail(app)
+
 db.create_all()
 
 WEBSITE_LOGIN_COOKIE_NAME = "science/session_token"
 COOKIE_DURATION = 900  # in seconds
+SENDER = "vboeke.dev@gmail.com"
+
+# Make a regular expression for validating an Email
+# for custom mails use: '^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w+$'
+EMAIL_REGEX = "^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w+$"
 
 
 def require_session_token(func):
@@ -68,28 +88,34 @@ def provide_user(func):
     wrapper.__name__ = func.__name__
     return wrapper
 
-def checkMailExists(email):
-    mail_exists = False
+@app.route("/test-mail")
+def test_mail():
+    try:
+        msg = Message(
+            subject="Flask WebDev Project Test Email",
+            sender="vboeke.dev@gmail.com",
+            recipients=["vboeke.dev@gmail.com"]
+        )
+        msg.body = "There is a new Blogpost!, Check this out!"
+        mail.send(msg)
+        return "Flask sent your mail!"
+    except Exception as e:
+        return str(e)
 
-    email
 
-    return mail_exists
+def check_email(email: str) -> bool:
+    return bool(re.search(EMAIL_REGEX, email))
 
-def checkMailFormat(email):
-    is_valid = False
-
-    if re.match(r"[^@]+@[^@]+\.[^@]+", email):
-        is_valid = True
-
-    return is_valid
 
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('404.html'), 404
 
+
 @app.errorhandler(500)
 def server_error(e):
     return render_template('500.html'), 500
+
 
 def getPath():
     return request.path or "/"
@@ -153,15 +179,18 @@ def login():
 
 @app.route('/registration', methods=["GET", "POST"])
 def registration():
+    default = "Admin"
     if request.method == "POST":
         username = request.form.get("username")
         email = request.form.get("email")
         password = request.form.get("password")
         repeat = request.form.get("repeat")
+        role = default
 
-        emailIsValid = mailCheck(email)
-        if not emailIsValid:
-            flash("Email is invalid!", "warning")
+        # check email valid
+        is_valid = check_email(email)
+        if not is_valid:
+            flash("Email is not a valid email", "warning")
             return redirect(url_for("registration"))
 
         if password != repeat:
@@ -177,10 +206,21 @@ def registration():
                     email=email,
                     password_hash=password_hash,
                     session_cookie=session_cookie,
-                    session_expiry_datetime=expiry_time)
+                    session_expiry_datetime=expiry_time,
+                    role=default)
         db.add(user)
         db.commit()
-        app.logger.info(f"User {username} is registered.")
+        flash("Registration successful!", "success")
+
+        msg = Message(
+            subject="HelloWorld Blog - Registration successful",
+            sender=SENDER,
+            recipients=[email],
+            bcc=[SENDER]
+        )
+
+        msg.body = f"Hi! {username}! Welcome!"
+        mail.send(msg)
 
         redirect_url = "/"
         response = make_response(redirect(redirect_url))
@@ -191,7 +231,7 @@ def registration():
         return render_template("register.html")
 
 @app.route('/about', methods=["GET"])
-@provide_user
+@require_session_token
 def about():
     return render_template("about.html", redirectTo=getPath())
 
@@ -200,6 +240,13 @@ def about():
 @require_session_token
 def faq():
     return render_template("faq.html", redirectTo=getPath())
+
+
+@app.route('/users', methods=["GET"])
+@require_session_token
+def users():
+    users = db.query(User)
+    return render_template("users.html", redirectTo=getPath(), users=users)
 
 
 @app.route('/logout', methods=["GET"])
@@ -238,6 +285,19 @@ def blog():
         )
         db.add(post)
         db.commit()
+
+        # send notification email
+        msg = Message(
+            subject="HelloWorld Blog - We have a new Blogpost for you!",
+            sender=SENDER,
+            recipients=[current_user.email]
+        )
+        msg.body = f"Hi {current_user.username}!\nWheehaw!\nLooks like there is a brandnew Blogpost\nEnjoy reading!"
+        msg.html = render_template("new_post.html",
+                                   username=current_user.username,
+                                   post=post)
+        mail.send(msg)
+
         return redirect(url_for('blog'))
 
     if request.method == "GET":
@@ -260,6 +320,20 @@ def posts(post_id):
         )
         db.add(comment)
         db.commit()
+
+        # send notification email
+        msg = Message(
+            subject="HelloWorld Blog - Someone left a comment",
+            sender=SENDER,
+            recipients=[current_user.email]
+        )
+        msg.body = f"Hi {current_user.username}!\nSome want you know his or her deep thoughts about your Blogpost.\nEnjoy!"
+        msg.html = render_template("new_post.html",
+                                   username=current_user.username,
+                                   post=post)
+        mail.send(msg)
+
+
         return redirect('/posts/{}'.format(post_id))
 
     elif request.method == "GET":
