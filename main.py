@@ -18,7 +18,7 @@ app.config.update(
     DEBUG=True,
     # EMAIL SETTINGS
     MAIL_SERVER=os.getenv("MAIL_SERVER", email_config.MAIL_SERVER),
-    MAIL_PORT=int(os.getenv("MAIL_PORT", email_config.MAIL_PORT)),
+    MAIL_PORT=os.getenv("MAIL_PORT", email_config.MAIL_PORT),
     MAIL_USE_SSL=True,
     MAIL_USERNAME=os.getenv("MAIL_USERNAME", email_config.MAIL_USERNAME),
     MAIL_PASSWORD=os.getenv("MAIL_PASSWORD", email_config.MAIL_PASSWORD),
@@ -34,7 +34,7 @@ SENDER = "vboeke.dev@gmail.com"
 
 # Make a regular expression for validating an Email
 # for custom mails use: '^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w+$'
-EMAIL_REGEX = "^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w+$"
+EMAIL_REGEX = '^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
 
 
 def require_session_token(func):
