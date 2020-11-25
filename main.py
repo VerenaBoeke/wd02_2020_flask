@@ -7,12 +7,22 @@ import re
 from flask import Flask, render_template, request, make_response, redirect, url_for, flash
 from flask_mail import Mail, Message
 
-import email_config
 from model import db, User, Post, Comment
+import redis_client
+import email_config
+
+redis = redis_client.from_url(os.environ.get("REDIS_URL"))
 
 app = Flask(__name__)
 
+# Keep this secret!
+# necessary for flash messages
 app.secret_key = b'dfdfgdsfgs-<34'
+
+LOCALHOST_NAME = "localhost"
+LOCALHOST_PORT = 7890
+
+HOST_ADDR = os.getenv("HOST_ADDR", f'http://{LOCALHOST_NAME}:{LOCALHOST_PORT}')
 
 app.config.update(
     DEBUG=True,
@@ -26,16 +36,44 @@ app.config.update(
 
 mail = Mail(app)
 
-db.create_all()
-
 WEBSITE_LOGIN_COOKIE_NAME = "science/session_token"
 COOKIE_DURATION = 900  # in seconds
+# EMAIL SENDER FOR ALL SITE NOTIFICATIONS
 SENDER = "vboeke.dev@gmail.com"
 
 # Make a regular expression for validating an Email
 # for custom mails use: '^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w+$'
 EMAIL_REGEX = '^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
 
+@app.route("/test-mail")
+def test_mail():
+    try:
+        msg = Message(
+            subject="Flask WebDev Project Test Email",
+            sender="vboeke.dev@gmail.com",
+            recipients=["vboeke.dev@gmail.com"]
+        )
+        msg.body = "There is a new Blogpost!, Check this out!"
+        mail.send(msg)
+        return "Flask sent your mail!"
+    except Exception as e:
+        return str(e)
+
+
+def check_email(email: str) -> bool:
+    return bool(re.search(EMAIL_REGEX, email))
+
+def check_email_exists(email: str) -> bool:
+    email_exists = False
+
+    user = db.query(User) \
+        .filter(User.email == email)\
+        .first()
+
+    if user:
+        email_exists = True
+
+    return email_exists
 
 def require_session_token(func):
     """Decorator to require authentication to access routes"""
@@ -77,9 +115,9 @@ def provide_user(func):
             request.user = None
             return func(*args, **kwargs)
 
-        user = db.query(User)\
-            .filter_by(session_cookie=session_token)\
-            .filter(User.session_expiry_datetime >= datetime.datetime.now())\
+        user = db.query(User) \
+            .filter_by(session_cookie=session_token) \
+            .filter(User.session_expiry_datetime >= datetime.datetime.now()) \
             .first()
 
         request.user = user
@@ -88,37 +126,9 @@ def provide_user(func):
     wrapper.__name__ = func.__name__
     return wrapper
 
-@app.route("/test-mail")
-def test_mail():
-    try:
-        msg = Message(
-            subject="Flask WebDev Project Test Email",
-            sender="vboeke.dev@gmail.com",
-            recipients=["vboeke.dev@gmail.com"]
-        )
-        msg.body = "There is a new Blogpost!, Check this out!"
-        mail.send(msg)
-        return "Flask sent your mail!"
-    except Exception as e:
-        return str(e)
-
-
-def check_email(email: str) -> bool:
-    return bool(re.search(EMAIL_REGEX, email))
-
-
-@app.errorhandler(404)
-def page_not_found(e):
-    return render_template('404.html'), 404
-
-
-@app.errorhandler(500)
-def server_error(e):
-    return render_template('500.html'), 500
-
-
 def getPath():
     return request.path or "/"
+
 
 @app.route('/', methods=["GET"])
 def index():
@@ -197,6 +207,11 @@ def registration():
             flash("Password and repeat did not match!", "warning")
             return redirect(url_for("registration"))
 
+        if check_email_exists(email):
+            flash("This E-Mail already exist, please go to Login", "warning")
+            return redirect(url_for("registration"))
+
+
         password_hash = hashlib.sha256(password.encode()).hexdigest()
 
         session_cookie = str(uuid.uuid4())
@@ -242,13 +257,6 @@ def faq():
     return render_template("faq.html", redirectTo=getPath())
 
 
-@app.route('/users', methods=["GET"])
-@require_session_token
-def users():
-    users = db.query(User)
-    return render_template("users.html", redirectTo=getPath(), users=users)
-
-
 @app.route('/logout', methods=["GET"])
 @provide_user
 def logout():
@@ -277,6 +285,17 @@ def blog():
     current_user = request.user
 
     if request.method == "POST":
+        # check if user registered with token is the user sending this request
+        # in debug and locally, you can check the content with:
+        # redis.tinydb.storage.read()
+        csrf_token = request.form.get("csrf_token")
+        csrf_token_user = redis.get(csrf_token) or b""
+        csrf_token_user = csrf_token_user.decode()
+        if csrf_token_user != current_user.username:
+            return "CSRF TOKEN INVALID"
+        # invalidate token again
+        #redis.delete(csrf_token)
+
         title = request.form.get("posttitle")
         text = request.form.get("posttext")
         post = Post(
@@ -302,7 +321,9 @@ def blog():
 
     if request.method == "GET":
         posts = db.query(Post).all()
-        return render_template("blog.html", posts=posts, redirectTo=getPath())
+        csrf_token = str(uuid.uuid4())
+        redis.set(csrf_token, current_user.username)
+        return render_template("blog.html", posts=posts, redirectTo=getPath(), user=request.user, csrf_token=csrf_token)
 
 
 @app.route('/posts/<post_id>', methods=["GET", "POST"])
@@ -312,7 +333,19 @@ def posts(post_id):
     post = db.query(Post).filter(Post.id == post_id).first()
 
     if request.method == "POST":
+        # check if user registered with token is the user sending this request
+        # in debug and locally, you can check the content with:
+        # redis.tinydb.storage.read()
+        csrf_token = request.form.get("csrf_token")
+        csrf_token_user = redis.get(csrf_token) or b""
+        csrf_token_user = csrf_token_user.decode()
+        if csrf_token_user != current_user.username:
+            return "CSRF TOKEN INVALID"
+        # invalidate token again
+        #redis.delete(csrf_token)
+
         text = request.form.get("text")
+
         comment = Comment(
             text=text,
             post=post,
@@ -321,25 +354,52 @@ def posts(post_id):
         db.add(comment)
         db.commit()
 
-        # send notification email
-        msg = Message(
-            subject="HelloWorld Blog - Someone left a comment",
-            sender=SENDER,
-            recipients=[current_user.email]
-        )
-        msg.body = f"Hi {current_user.username}!\nSome want you know his or her deep thoughts about your Blogpost.\nEnjoy!"
-        msg.html = render_template("new_post.html",
-                                   username=current_user.username,
-                                   post=post)
-        mail.send(msg)
-
+        # if user writes comment, with all other users
+        # who have written a comment in this post and notify them
+        users = list(set([c.user for c in post.comments] + [post.user]))
+        for user in users:
+            # send notification email
+            msg = Message(
+                subject=f"Hello World Blog - News about a Blogpost you are interestet in",
+                sender=SENDER,
+                recipients=[user.email]
+            )
+            msg.body = f"Hi {user.username}!\n" \
+                f"Another Comment Reply on the Post: {post.title}" \
+                f"\n{HOST_ADDR}/posts/{post.id}" \
+                f"\nEnjoy!"
+            msg.html = render_template("new_comment.html",
+                                       username=current_user.username,
+                                       link=f"{HOST_ADDR}/posts/{post.id}",
+                                       post=post,
+                                       comment=comment)
+            mail.send(msg)
 
         return redirect('/posts/{}'.format(post_id))
 
     elif request.method == "GET":
         comments = db.query(Comment).filter(Comment.post_id == post_id).all()
-        return render_template('posts.html', post=post, comments=comments, redirectTo=getPath())
+        csrf_token = str(uuid.uuid4())
+        redis.set(csrf_token, current_user.username)
+        return render_template('posts.html', post=post, comments=comments, user=request.user, redirectTo=getPath(), csrf_token=csrf_token)
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
+
+
+@app.errorhandler(500)
+def server_error(e):
+    return render_template('500.html'), 500
+
+
+@app.route('/users', methods=["GET"])
+@require_session_token
+def users():
+    users = db.query(User)
+    return render_template("users.html", redirectTo=getPath(), users=users)
 
 
 if __name__ == '__main__':
-    app.run(host='localhost', port=7890)
+    app.run(host=LOCALHOST_NAME, port=LOCALHOST_PORT)

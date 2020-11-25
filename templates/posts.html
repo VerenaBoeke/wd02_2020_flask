@@ -42,6 +42,7 @@ Posts - {{post.title}}
                 <label for="commentInput">Comment</label>
                 <input type="text" name="text" class="form-control" placeholder="your-comment" id="commentInput">
             </div>
+            <input hidden type="password" name="csrf_token" id="csrf_token" value="{{csrf_token}}">
             <button type="submit" class="btn btn-primary">Send</button>
         </form>
     </div>
