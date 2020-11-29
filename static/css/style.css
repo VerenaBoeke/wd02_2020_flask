@@ -94,3 +94,7 @@ max-width: 300px;
     background-color: #264653;
     color: #fff;
 }
+
+.hidden {
+    display: none;
+}

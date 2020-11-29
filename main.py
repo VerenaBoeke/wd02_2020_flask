@@ -294,7 +294,7 @@ def blog():
         if csrf_token_user != current_user.username:
             return "CSRF TOKEN INVALID"
         # invalidate token again
-        #redis.delete(csrf_token)
+        redis.delete(csrf_token)
 
         title = request.form.get("posttitle")
         text = request.form.get("posttext")
@@ -342,7 +342,7 @@ def posts(post_id):
         if csrf_token_user != current_user.username:
             return "CSRF TOKEN INVALID"
         # invalidate token again
-        #redis.delete(csrf_token)
+        redis.delete(csrf_token)
 
         text = request.form.get("text")
 
