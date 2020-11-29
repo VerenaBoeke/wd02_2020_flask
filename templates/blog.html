@@ -28,12 +28,12 @@ Blog
                 <div class="form-group">
                     <label for="posttitle">Post Title</label>
                     <input type="text" name="posttitle" class="form-control" id="posttitle">
-                    <p id="titleError" class="error hidden">Das Feld darf nicht leer sein.</p>
+                    <p id="titleError" class="error hidden"><strong>Das Feld darf nicht leer sein.</strong></p>
                 </div>
                 <div class="form-group">
                     <label for="postcontent">Post Content</label>
                     <textarea rows="6" name="posttext" class="form-control" id="postcontent"></textarea>
-                    <p id="textError" class="error hidden">Das Feld darf nicht leer sein.</p>
+                    <p id="textError" class="error hidden"><strong>Das Feld darf nicht leer sein.</strong></p>
                 </div>
                 <input hidden type="password" name="csrf_token" id="csrf_token" value="{{csrf_token}}">
                 <button type="submit" class="btn btn-primary">Post</button>
