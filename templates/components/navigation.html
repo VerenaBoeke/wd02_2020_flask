@@ -5,37 +5,37 @@
   <div class="collapse navbar-collapse" id="navbarNav">
     <ul class="navbar-nav">
       <li class="nav-item {% if navigation == 'home' %}active{% endif %}">
-        <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
+        <a class="nav-link" href="{{url_for('main.index')}}">Home <span class="sr-only">(current)</span></a>
       </li>
       <li class="nav-item {% if navigation == 'about' %}active{% endif %}">
-        <a class="nav-link" href="/about">About</a>
+        <a class="nav-link" href="{{url_for('main.about')}}">About</a>
       </li>
       <li class="nav-item {% if navigation == 'blog' %}active{% endif %}">
-        <a class="nav-link" href="/blog">Blog</a>
+        <a class="nav-link" href="{{url_for('blog.posts')}}">Blog</a>
       </li>
       <li class="nav-item {% if navigation == 'faq' %}active{% endif %}">
-        <a class="nav-link" href="/faq">FAQ</a>
+        <a class="nav-link" href="{{url_for('main.faq')}}">FAQ</a>
       </li>
       <li class="nav-item {% if navigation == 'crypto' %}active{% endif %}">
-        <a class="nav-link" href="/crypto">currency converter</a>
+        <a class="nav-link" href="{{url_for('main.crypto')}}">currency converter</a>
       </li>
       <li class="nav-item {% if navigation == 'gallery' %}active{% endif %}">
-        <a class="nav-link" href="/gallery">Gallery</a>
+        <a class="nav-link" href="{{url_for('main.gallery')}}">Gallery</a>
       </li>
       <li class="nav-item {% if navigation == 'users' %}active{% endif %}">
-        <a class="nav-link" href="/users">Users</a>
+        <a class="nav-link" href="{{url_for('user.user')}}">Users</a>
       </li>
       <li class="nav-item {% if navigation == 'registration' %}active{% endif %}">
-        <a class="nav-link" href="/registration">Register</a>
+        <a class="nav-link" href="{{url_for('user.registration')}}">Register</a>
       </li>
       <li class="nav-item {% if navigation == 'github' %}active{% endif %}">
         <a class="nav-link" href="https://github.com/VerenaBoeke/wd02_2020_flask">GitHub</a>
       </li>
       <li class="nav-item right">
-          <a class="nav-link" href="/logout">Logout</a>
+          <a class="nav-link" href="{{url_for('main.logout')}}">Logout</a>
       </li>
         <li class="nav-item right">
-          <a class="nav-link" href="/login?redirectTo={{ redirectTo }}">Login</a>
+          <a class="nav-link" href="{{url_for('user.login')}}">Login</a>
       </li>
     </ul>
   </div>

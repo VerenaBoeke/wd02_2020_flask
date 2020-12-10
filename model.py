@@ -1,8 +1,5 @@
 import datetime
-
-from sqla_wrapper import SQLAlchemy
-
-db = SQLAlchemy("sqlite:///blog.sqlite")
+from extensions import db
 
 
 class User(db.Model):
@@ -29,7 +26,7 @@ class Post(db.Model):
     title = db.Column(db.String)
     text = db.Column(db.String)
 
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
     user = db.relationship(User)
 
     comments = db.relationship('Comment', backref='posts')
@@ -42,12 +39,8 @@ class Comment(db.Model):
 
     text = db.Column(db.String)
 
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
     user = db.relationship(User)
 
-    post_id = db.Column(db.Integer, db.ForeignKey("posts.id"))
+    post_id = db.Column(db.Integer, db.ForeignKey("post.id"))
     post = db.relationship(Post)
-
-
-
-db.create_all()
