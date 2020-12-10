@@ -256,6 +256,15 @@ def about():
 def faq():
     return render_template("faq.html", redirectTo=getPath())
 
+@app.route('/crypto', methods=["GET"])
+@require_session_token
+def crypto():
+    return render_template("crypto.html", redirectTo=getPath())
+
+@app.route('/gallery', methods=["GET"])
+@require_session_token
+def gallery():
+    return render_template("gallery.html", redirectTo=getPath())
 
 @app.route('/logout', methods=["GET"])
 @provide_user

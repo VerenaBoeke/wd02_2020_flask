@@ -43,6 +43,10 @@ nav {
     text-shadow: 10px 10px 30px #209EC6;
 }
 
+#outputPhoto h3 {
+    padding-top: 30px;
+}
+
 .form-control-lg {
 max-width: 300px;
 }

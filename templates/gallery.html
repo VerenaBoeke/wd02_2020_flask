@@ -1,0 +1,20 @@
+{% extends "frame.html" %}
+
+{% block title %}
+Home
+{% endblock title %}
+
+{% block navigation %}
+{% include "components/navigation.html" %}
+{% endblock navigation %}
+
+{% block content %}
+        <h1 id="time">Gallery</h1>
+
+        <select name="photos" id="photos" onchange="outputPhoto();">
+            <option value="" disabled selected>Bitte wähle ein Bild</option>
+        </select>
+        <div id="outputPhoto"></div>
+
+        <script type="text/javascript" src="../static/js/gallery.js"></script>
+{% endblock content %}
