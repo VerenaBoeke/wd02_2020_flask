@@ -44,11 +44,11 @@ def require_session_token(func):
 
     def wrapper(*args, **kwargs):
         session_token = request.cookies.get(WEBSITE_LOGIN_COOKIE_NAME)
-        redirect_url = request.path or '/'
+        redirect_url = request.path or url_for("main.index")
 
         if not session_token:
             logging.error('no token in request')
-            return redirect(url_for('login', redirectTo=redirect_url))
+            return redirect(url_for('user.login', redirectTo=redirect_url))
 
         user = User.query \
             .filter_by(session_cookie=session_token) \
@@ -57,7 +57,7 @@ def require_session_token(func):
 
         if not user:
             logging.error(f'token {session_token} not valid')
-            return redirect(url_for('login', redirectTo=redirect_url))
+            return redirect(url_for('user.login', redirectTo=redirect_url))
 
         logging.info(
             f'authenticated user {user.username} with token {user.session_cookie} valid until {user.session_expiry_datetime.isoformat()}')
@@ -79,7 +79,7 @@ def provide_user(func):
             request.user = None
             return func(*args, **kwargs)
 
-        user = db.query(User) \
+        user = User.query \
             .filter_by(session_cookie=session_token) \
             .filter(User.session_expiry_datetime >= datetime.datetime.now()) \
             .first()
@@ -91,4 +91,4 @@ def provide_user(func):
     return wrapper
 
 def getPath():
-    return request.path or "/"
+    return request.path or url_for("main.index")

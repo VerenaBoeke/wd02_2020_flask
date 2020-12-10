@@ -21,7 +21,7 @@ CONFIG = dict(
     MAIL_USE_SSL=True,
     MAIL_USERNAME=os.getenv("MAIL_USERNAME", email_config.MAIL_USERNAME),
     MAIL_PASSWORD=os.getenv("MAIL_PASSWORD", email_config.MAIL_PASSWORD),
-    SQLALCHEMY_DATABASE_URI=os.getenv("DATABASE_URL", "sqlite://blog.sqlite")
+    SQLALCHEMY_DATABASE_URI=os.getenv("DATABASE_URL", "sqlite:///blog.sqlite")
 )
 
 def register_extensions(app):
@@ -30,9 +30,9 @@ def register_extensions(app):
     csrf_protect.init_app(app)
 
 def register_blueprints(app):
-    app.register_blueprint(blog.views.Blueprint)
-    app.register_blueprint(main.views.Blueprint)
-    app.register_blueprint(main.views.Blueprint)
+    app.register_blueprint(blog.views.blueprint)
+    app.register_blueprint(main.views.blueprint)
+    app.register_blueprint(main.views.blueprint)
 
 def configure_logger(app):
     handler = logging.StreamHandler(sys.stdout)

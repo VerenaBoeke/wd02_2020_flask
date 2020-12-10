@@ -1,1 +1,1 @@
-import sites.blog.views
+import sites.user.views

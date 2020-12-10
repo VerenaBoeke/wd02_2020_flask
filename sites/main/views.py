@@ -45,7 +45,7 @@ def crypto():
     return render_template("crypto.html", redirectTo=getPath())
 
 
-@app.route('/gallery', methods=["GET"])
+@blueprint.route('/gallery', methods=["GET"])
 @require_session_token
 def gallery():
     return render_template("gallery.html", redirectTo=getPath())

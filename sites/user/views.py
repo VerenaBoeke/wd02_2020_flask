@@ -151,6 +151,6 @@ def logout():
 
 @blueprint.route('/users', methods=["GET"])
 @require_session_token
-def users():
+def usertabelle():
     users = db.query(User)
     return render_template("users.html", redirectTo=getPath(), users=users)
