@@ -8,7 +8,7 @@ from flask_wtf.csrf import CSRFError
 
 import email_config
 from extensions import csrf_protect, db, mail
-from sites import main, blog
+from sites import main, blog, user
 
 app = Flask(__name__)
 
@@ -32,7 +32,7 @@ def register_extensions(app):
 def register_blueprints(app):
     app.register_blueprint(blog.views.blueprint)
     app.register_blueprint(main.views.blueprint)
-    app.register_blueprint(main.views.blueprint)
+    app.register_blueprint(user.views.blueprint)
 
 def configure_logger(app):
     handler = logging.StreamHandler(sys.stdout)
