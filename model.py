@@ -7,6 +7,7 @@ class User(db.Model):
     email = db.Column(db.String(255), unique=True)
 
     hobby = db.Column(db.String(255), nullable=True, unique=False)
+    profilepic = db.Column(db.LargeBinary, nullable=True, unique=False)
 
     created = db.Column(db.DateTime, default=datetime.datetime.now)
     updated = db.Column(db.DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)

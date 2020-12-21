@@ -1,8 +1,9 @@
+import base64
 import datetime
-import hashlib
 import uuid
+import logging
 
-from flask import render_template, request, make_response, redirect, url_for, flash, Blueprint, logging
+from flask import render_template, request, make_response, redirect, url_for, flash, Blueprint
 from flask_mail import Message
 
 from extensions import db, mail, bcrypt
@@ -12,6 +13,32 @@ from sites import provide_user, WEBSITE_LOGIN_COOKIE_NAME, SENDER, HOST_ADDR, ch
 
 blueprint = Blueprint("user", __name__, url_prefix="/users", static_folder="../../static")
 
+@blueprint.route('/profiles/<username>', methods=["GET", "POST"])
+@require_session_token
+def profile(username):
+    user = User.query.filter_by(username=username).one()
+    if request.method=="POST":
+        email = request.form.get("email")
+        if email != user.email:
+            user.email = email
+
+        hobby = request.form.get("hobby")
+        if hobby != user.hobby:
+            user.hobby = hobby
+
+        profilepic = request.files.get("profilepic")
+        if profilepic:
+            user.profilepic = profilepic.stream.read()
+
+
+        db.session.add(user)
+        db.session.commit()
+
+        return redirect(url_for('user.profile', username=username))
+
+    elif request.method=="GET":
+        profilepic_base64 = base64.encodebytes(user.profilpic)
+        return render_template("profile.html", user=user, profilepic_base64=profilepic_base64)
 
 @blueprint.route('/login', methods=["GET", "POST"])
 def login():
@@ -35,7 +62,7 @@ def login():
             flash("Username or password is wrong", "warning")
             logging.info(f"User {username} failed to login with wrong username.")
             return redirect(url_for('user.login', redirectTo=redirect_url))
-        elif bcrypt.check_password_hash(user.password_hash, password):
+        elif not bcrypt.check_password_hash(user.password_hash, password):
             flash("Username or password is wrong", "warning")
             logging.info(f"User {username} failed to login with wrong password.")
             return redirect(url_for('user.login', redirectTo=redirect_url))

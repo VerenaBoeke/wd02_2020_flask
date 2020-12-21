@@ -1,8 +1,8 @@
-from flask import render_template, Blueprint
+from flask import render_template, Blueprint, request
 from flask_mail import Message
 
 from extensions import mail
-from sites import require_session_token, getPath
+from sites import require_session_token, getPath, provide_user
 
 blueprint = Blueprint("main", __name__, url_prefix="/", static_folder="../../static")
 
@@ -23,8 +23,9 @@ def test_mail():
 
 
 @blueprint.route('/', methods=["GET"])
+@provide_user
 def index():
-    return render_template("index.html", redirectTo=getPath())
+    return render_template("index.html", user=request.user)
 
 
 @blueprint.route('/about', methods=["GET"])
