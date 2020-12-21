@@ -50,3 +50,8 @@ def crypto():
 @require_session_token
 def gallery():
     return render_template("gallery.html", redirectTo=getPath())
+
+@blueprint.route('/pwny', methods=["GET"])
+@require_session_token
+def pwny():
+    return render_template("pwnyname.html", redirectTo=getPath())

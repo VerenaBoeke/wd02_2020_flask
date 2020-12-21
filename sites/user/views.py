@@ -37,7 +37,7 @@ def profile(username):
         return redirect(url_for('user.profile', username=username))
 
     elif request.method=="GET":
-        profilepic_base64 = base64.encodebytes(user.profilpic)
+        profilepic_base64 = base64.encodebytes(user.profilepic or b"").decode('ascii')
         return render_template("profile.html", user=user, profilepic_base64=profilepic_base64)
 
 @blueprint.route('/login', methods=["GET", "POST"])

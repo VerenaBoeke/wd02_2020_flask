@@ -10,23 +10,18 @@
       <li class="nav-item {% if navigation == 'about' %}active{% endif %}">
         <a class="nav-link" href="{{url_for('main.about')}}">About</a>
       </li>
-      <li class="nav-item {% if navigation == 'blog' %}active{% endif %}">
-        <a class="nav-link" href="{{url_for('blog.posts')}}">Blog</a>
-      </li>
       <li class="nav-item {% if navigation == 'faq' %}active{% endif %}">
         <a class="nav-link" href="{{url_for('main.faq')}}">FAQ</a>
       </li>
-      <li class="nav-item {% if navigation == 'crypto' %}active{% endif %}">
-        <a class="nav-link" href="{{url_for('main.crypto')}}">currency converter</a>
-      </li>
-      <li class="nav-item {% if navigation == 'gallery' %}active{% endif %}">
-        <a class="nav-link" href="{{url_for('main.gallery')}}">Gallery</a>
-      </li>
-      <li class="nav-item {% if navigation == 'users' %}active{% endif %}">
-        <a class="nav-link" href="{{url_for('user.usertabelle')}}">Users</a>
-      </li>
-      <li class="nav-item {% if navigation == 'registration' %}active{% endif %}">
-        <a class="nav-link" href="{{url_for('user.registration')}}">Register</a>
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          Projects
+        </a>
+        <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+          <a class="dropdown-item" href="{{url_for('main.crypto')}}">Currency Converter</a>
+          <a class="dropdown-item" href="{{url_for('main.gallery')}}">Gallery</a>
+          <a class="dropdown-item" href="{{url_for('main.pwny')}}">Pwnyname Generator</a>
+        </div>
       </li>
       <li class="nav-item {% if navigation == 'github' %}active{% endif %}">
         <a class="nav-link" href="https://github.com/VerenaBoeke/wd02_2020_flask">GitHub</a>
@@ -35,9 +30,18 @@
         <li class="nav-item right">
             <a class="nav-link" href="{{url_for('user.login')}}">Login</a>
         </li>
+        <li class="nav-item {% if navigation == 'registration' %}active{% endif %}">
+          <a class="nav-link" href="{{url_for('user.registration')}}">Register</a>
+        </li>
       {% else %}
+        <li class="nav-item {% if navigation == 'blog' %}active{% endif %}">
+          <a class="nav-link" href="{{url_for('blog.posts')}}">Blog</a>
+        </li>
+        <li class="nav-item {% if navigation == 'users' %}active{% endif %}">
+          <a class="nav-link" href="{{url_for('user.usertabelle')}}">Users</a>
+        </li>
         <li class="nav-item right">
-            <a class="nav-link" href="{{url_for('user.logout')}}">Logout</a>
+          <a class="nav-link" href="{{url_for('user.logout')}}">Logout</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="{{url_for('user.profile', username=user.username)}}">Profil</a>
